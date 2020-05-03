@@ -4,15 +4,17 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Download COCO data")
-    parser.add_argument("-d", "--dir", type=str, default="data", dest="dir",
+    parser.add_argument("--data-dir", type=str, default="data", dest="data_dir",
                         help="Directory to save the data")
+    parser.add_argument("--download-dir", type=str, default=None, dest="download_dir",
+                        help="Directory to download the data")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    coco_builder = tfds.builder("coco/2017_panoptic", data_dir=args.dir)
-    coco_builder.download_and_prepare()
+    coco_builder = tfds.builder("coco/2017_panoptic", data_dir=args.data_dir)
+    coco_builder.download_and_prepare(download_dir=args.download_dir)
 
 
 if __name__ == '__main__':
