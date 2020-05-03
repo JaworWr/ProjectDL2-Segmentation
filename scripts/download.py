@@ -3,7 +3,7 @@ import argparse
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Download COCO data")
+    parser = argparse.ArgumentParser(description="Download calltech_birds2011 data")
     parser.add_argument("--data-dir", type=str, default="data", dest="data_dir",
                         help="Directory to save the data")
     parser.add_argument("--download-dir", type=str, default=None, dest="download_dir",
@@ -13,8 +13,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    coco_builder = tfds.builder("coco/2017_panoptic", data_dir=args.data_dir)
-    coco_builder.download_and_prepare(download_dir=args.download_dir)
+    birds_builder = tfds.builder("caltech_birds2011", data_dir=args.data_dir)
+    birds_builder.download_and_prepare(download_dir=args.download_dir)
 
 
 if __name__ == '__main__':

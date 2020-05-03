@@ -2,8 +2,7 @@ __pycache__
 # PyCharm settings
 .idea
 # image data
-coco
-downloads
+data
 # experiments data
 experiments
 # jupyter notebooks
