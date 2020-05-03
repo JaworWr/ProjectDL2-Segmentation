@@ -2,9 +2,8 @@ __pycache__
 # PyCharm settings
 .idea
 # image data
-data/**/*.png
-data/**/*.gif
-data/**/*.jpg
+coco
+downloads
 # experiments data
 experiments
 # jupyter notebooks
