@@ -3,7 +3,7 @@ import argparse
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Download calltech_birds2011 data")
+    parser = argparse.ArgumentParser(description="Download caltech_birds2011 data")
     parser.add_argument("--data-dir", type=str, default="data", dest="data_dir",
                         help="Directory to save the data")
     parser.add_argument("--download-dir", type=str, default=None, dest="download_dir",
