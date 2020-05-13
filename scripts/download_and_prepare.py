@@ -60,7 +60,7 @@ def download_zip_data(download_dir):
                     progressbar.Percentage(),
                     " ", progressbar.DataSize(), " of ", progressbar.DataSize(variable="max_value"),
                     " ", progressbar.Bar(),
-                    " ", progressbar.FileTransferSpeed(),
+                    " ", progressbar.AdaptiveTransferSpeed(),
                     " ", progressbar.ETA(),
                 ]
                 with open(path, "wb") as f, progressbar.ProgressBar(max_value=content_len, widgets=widgets) as bar:
