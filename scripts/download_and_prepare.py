@@ -64,7 +64,7 @@ def download_zip_data(download_dir):
                     " ", progressbar.ETA(),
                 ]
                 with open(path, "wb") as f, progressbar.ProgressBar(max_value=content_len, widgets=widgets) as bar:
-                    for chunk in r.iter_content(chunk_size=8192):
+                    for chunk in r.iter_content(chunk_size=1024*1024):
                         d += len(chunk)
                         bar.update(d)
                         f.write(chunk)
