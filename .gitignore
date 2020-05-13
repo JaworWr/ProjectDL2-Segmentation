@@ -7,6 +7,7 @@ data
 experiments
 # jupyter notebooks
 *.ipynb
+.ipynb_checkpoints
 # except for the final report
 !Raport.ipynb
 # model parameters
