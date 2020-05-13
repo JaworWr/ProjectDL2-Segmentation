@@ -2,7 +2,7 @@ import tensorflow_datasets as tfds
 
 
 def get_train_valid_data(config):
-    d = _get_data(config, ["train[:90%]", "train[90%:]"])
+    d = _get_data(config, ["train", "validation"])
     d = {
         "train": d[0],
         "valid": d[1],
@@ -19,6 +19,7 @@ def get_test_data(config):
 def _get_data(config, splits):
     data_dir = config.data.get("data_dir", "data")
     download_dir = config.data.get("download_dir", None)
+    extract_dir = config.data.get("extract_dir", None)
 
     splits = tfds.load(
         "caltech_birds2011",
@@ -26,7 +27,10 @@ def _get_data(config, splits):
         batch_size=config.data.batch_size,
         split=splits,
         download_and_prepare_kwargs=dict(
-            download_dir=download_dir
+            download_dir=extract_dir,
+            download_config=tfds.download.DownloadConfig(
+                manual_dir=download_dir
+            )
         )
     )
     return splits

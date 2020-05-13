@@ -1,7 +1,6 @@
 import tensorflow_datasets as tfds
 import argparse
-import getpass
-import requests
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Download cityscapes data")
@@ -18,7 +17,7 @@ def main():
     args = parse_args()
     birds_builder = tfds.builder("cityscapes", data_dir=args.data_dir)
     download_config = tfds.download.DownloadConfig(
-        manual_dir = args.download_dir
+        manual_dir=args.download_dir
     )
     birds_builder.download_and_prepare(download_dir=args.extract_dir, download_config=download_config)
 
