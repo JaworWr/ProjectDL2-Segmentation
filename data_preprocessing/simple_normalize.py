@@ -10,6 +10,8 @@ def _normalize(input_image):
 class SimpleNormalize(BaseDataPreprocessing):
     def __init__(self, config):
         super().__init__(config)
+
+    def preprocess_config(self):
         self.config.model.input_shape = (*self.config.data_preprocessing.image_size, 3)
         self.config.model.num_classes = 34
 
