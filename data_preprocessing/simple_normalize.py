@@ -11,6 +11,7 @@ class SimpleNormalize(BaseDataPreprocessing):
     def __init__(self, config):
         super().__init__(config)
         self.config.model.input_shape = (*self.config.data_preprocessing.image_size, 3)
+        self.config.model.num_classes = 34
 
     def preprocess(self, datapoint):
         image_size = tuple(self.config.data_preprocessing.image_size)
