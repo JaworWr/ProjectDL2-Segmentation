@@ -13,7 +13,7 @@ def get_train_valid_data(config, preprocessing: BaseDataPreprocessing):
     d = _get_data(config, ["train[:90%]", "train[90%:]"],
                   shuffle_files=config.data.get("shuffle", False))
     d = [d[0].map(preprocess_train), d[1].map(preprocess_test)]
-    d = [s.prefetch(config.data.get("prefetch_buffer", 10)) for s in d]
+    d = [s.prefetch(config.data.get("prefetch_buffer", 1)) for s in d]
     return {"train": d[0], "valid": d[1]}
 
 
@@ -24,7 +24,7 @@ def get_test_data(config, preprocessing: BaseDataPreprocessing):
 
     return _get_data(config, "validation") \
         .map(preprocess_test) \
-        .prefetch(config.data.get("prefetch_buffer", 10))
+        .prefetch(config.data.get("prefetch_buffer", 1))
 
 
 def _get_data(config, splits, shuffle_files=False):

@@ -69,7 +69,8 @@ def main(args):
 
     print("Building model...")
     model: base.model.BaseModel = classes["model"](cfg)
-    model.build_model()
+    model.build()
+    model.compile()
     print(model.summary())
     model.load()
 
