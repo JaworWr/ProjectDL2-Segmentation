@@ -2,10 +2,10 @@ from base.model import BaseModel
 from tensorflow.keras import layers, models, losses, metrics, optimizers
 
 
-def _downsample_block(channels, n=2, batch_norm=False, name=None):
+def _downsample_block(channels, n=2, batch_norm=False, name=None, **kwargs):
     block = models.Sequential(name=name)
     for _ in range(n):
-        block.add(layers.Conv2D(channels, 3, padding="valid", activation="relu"))
+        block.add(layers.Conv2D(channels, 3, activation="relu", **kwargs))
         if batch_norm:
             block.add(layers.BatchNormalization())
     return block
@@ -30,39 +30,41 @@ def _upconvolution(channels, batch_norm=False, name=None):
 class UnetModel(BaseModel):
     def build(self):
         """
+        Build the model
         input shape: [batch_size, w, h, channels]
         """
-        inputs = input(self.config.model.input_shape)
+        inputs = layers.Input(self.config.model.input_shape)
         x = inputs
         skips = []
         channels = self.config.model.channels
         batch_norm = self.config.model.batch_norm
 
-        for k in channels[:-1]:
-            block = _downsample_block(k, batch_norm=batch_norm, name="downsampler_block")
+        for i, k in enumerate(channels[:-1]):
+            block = _downsample_block(k, batch_norm=batch_norm, padding="valid", name=f"downsampler_block_{i}")
             x = block(x)
             skips.append(x)
             pool = layers.MaxPool2D(2)
             x = pool(x)
 
-        bottom_conv = layers.Conv2D(channels[-1], 3, padding="same", activation="relu")
-        x = bottom_conv(x)
-        if batch_norm:
-            batch_norm = layers.BatchNormalization()
-            x = batch_norm(x)
+        bottom_block = _downsample_block(channels[-1], batch_norm=batch_norm, padding="same", name="bottom_block")
+        x = bottom_block(x)
 
-        for skip, k in zip(reversed(skips), reversed(channels[:-1])):
-            upsample = _upconvolution(k, batch_norm=batch_norm, name="up-conv2d")
+        for i, (skip, k) in enumerate(zip(reversed(skips), reversed(channels[:-1]))):
+            upsample = _upconvolution(k, batch_norm=batch_norm, name=f"up_conv2d_{i}")
             x = upsample(x)
             concat = layers.Concatenate(axis=3)
             x = concat([skip, x])
-            block = _upsample_block(k, batch_norm=batch_norm, name="upsampler_block")
+            block = _upsample_block(k, batch_norm=batch_norm, name=f"upsampler_block_{i}")
             x = block(x)
 
-        outputs = layers.Conv2D(self.config.model.num_classes, 1)
+        output_conv = layers.Conv2D(self.config.model.num_classes, 1)
+        outputs = output_conv(x)
         self.model = models.Model(inputs=inputs, outputs=outputs)
 
     def compile(self):
+        if not self.model:
+            raise RuntimeError("You have to build the model before compiling it.")
+
         self.model.compile(
             optimizer=optimizers.Adam(learning_rate=self.config.model.learning_rate),
             loss=losses.SparseCategoricalCrossentropy(from_logits=True),
