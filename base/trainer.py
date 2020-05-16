@@ -1,3 +1,4 @@
+import tensorflow as tf
 from tensorflow.keras import callbacks
 import os
 from datetime import datetime
@@ -12,11 +13,16 @@ class BaseTrainer:
         self.callbacks = []
         self.log_dir = None
 
-        if config.trainer.get("tensorboard_enabled", False):
+        if self.config.trainer.tensorboard_enabled:
             experiment_name = config.trainer.get("experiment_name",
                                                  datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
             directory = config.trainer.get("log_directory", "experiments/logs")
             self.log_dir = os.path.join(directory, experiment_name)
+
+            self.file_writer = tf.summary.create_file_writer(self.log_dir)
+            self.file_writer.set_as_default()
+            tf.summary.text("config", self.config._text)
+
             self._init_tensorboard_callback()
 
     def init_callbacks(self):

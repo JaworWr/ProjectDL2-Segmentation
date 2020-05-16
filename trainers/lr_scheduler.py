@@ -8,9 +8,6 @@ class LRSchedulerTrainer(BaseTrainer):
     def __init__(self, config, model, data):
         super().__init__(config, model, data)
 
-        self.file_writer = tf.summary.create_file_writer(self.log_dir)
-        self.file_writer.set_as_default()
-
         self.init_callbacks()
 
     def log_lr(self, epoch):
@@ -28,6 +25,8 @@ class LRSchedulerTrainer(BaseTrainer):
                 save_weights_only=True,
                 **self.config.trainer.model_checkpoint
             ))
-        self.callbacks.append(callbacks.LambdaCallback(
-            on_epoch_begin=lambda epoch, loss: self.log_lr(epoch)
-        ))
+
+        if self.config.trainer.tensorboard_enabled:
+            self.callbacks.append(callbacks.LambdaCallback(
+                on_epoch_begin=lambda epoch, loss: self.log_lr(epoch)
+            ))
