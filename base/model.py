@@ -29,18 +29,7 @@ class BaseModel:
     def compile(self):
         raise NotImplementedError
 
-    def summary(self):
-        return self.model.summary()
-
-    def fit(self, *args, **kwargs):
+    def __getattr__(self, item):
         if self.model is None:
-            raise RuntimeError("You have to build the model before training it.")
-
-        self.model.fit(*args, **kwargs)
-
-    def evaluate(self, *args, **kwargs):
-        if self.model is None:
-            raise RuntimeError("You have to build the model before evaluating it.")
-
-        result = self.model.evaluate(*args, **kwargs)
-        return list(result)
+            raise RuntimeError("You have to build the model first.")
+        return getattr(self.model, item)
