@@ -29,12 +29,28 @@ class BaseTrainer:
 
             self._init_tensorboard_callback()
 
+        if self.config.trainer.model_checkpoint:
+            self._init_model_checkpoint_callback()
+
     def init_callbacks(self):
         raise NotImplementedError
 
     def _init_tensorboard_callback(self):
         tensorboard_callback = callbacks.TensorBoard(log_dir=self.log_dir)
         self.callbacks.append(tensorboard_callback)
+
+    def _init_model_checkpoint_callback(self):
+        filepath = None
+        if "filepath" in self.config.trainer.model_checkpoint_args:
+            filepath = self.config.trainer.model_checkpoint_args.filepath
+        elif "save_checkpoint" in self.config.model:
+            filepath = self.config.model.save_checkpoint + "_training"
+
+        self.callbacks.append(callbacks.ModelCheckpoint(
+            save_weights_only=True,
+            filepath=filepath
+            **self.config.trainer.model_checkpoint_args
+        ))
 
     def train(self):
         self.model.fit(

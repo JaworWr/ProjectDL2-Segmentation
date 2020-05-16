@@ -7,7 +7,6 @@ from base.trainer import BaseTrainer
 class ReduceLROnPlateauTrainer(BaseTrainer):
     def __init__(self, config, model, data):
         super().__init__(config, model, data)
-
         self.init_callbacks()
 
     def log_lr(self, epoch):
@@ -15,11 +14,6 @@ class ReduceLROnPlateauTrainer(BaseTrainer):
 
     def init_callbacks(self):
         self.callbacks.append(callbacks.ReduceLROnPlateau(**self.config.trainer.reduce_lr_on_plateau))
-        if "model_checkpoint" in self.config.trainer:
-            self.callbacks.append(callbacks.ModelCheckpoint(
-                save_weights_only=True,
-                **self.config.trainer.model_checkpoint
-            ))
         if self.config.trainer.tensorboard_enabled:
             self.callbacks.append(callbacks.LambdaCallback(
                 on_epoch_begin=lambda epoch, loss: self.log_lr(epoch)
