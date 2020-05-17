@@ -9,7 +9,7 @@ class BaseModel:
             raise RuntimeError("You have to build the model before saving it.")
 
         if self.config.model.save_checkpoint:
-            print("Saving model...")
+            print(f"\nSaving model checkpoint {self.config.model.save_checkpoint}...")
             self.model.save_weights(self.config.model.save_checkpoint)
             print("Model saved")
 
@@ -19,7 +19,7 @@ class BaseModel:
             raise RuntimeError("You have to build the model before loading it.")
 
         if self.config.model.load_checkpoint:
-            print(f"Loading model checkpoint {self.config.model.load_checkpoint}...")
+            print(f"\nLoading model checkpoint {self.config.model.load_checkpoint}...")
             self.model.load_weights(self.config.model.load_checkpoint)
             print("Model loaded")
 
