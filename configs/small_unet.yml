@@ -1,0 +1,31 @@
+model:
+  module_name: models.unet
+  class_name: UnetModel
+  channels: [32, 64, 128]
+  batch_norm: True
+  learning_rate: 1.0e-3
+
+trainer:
+  module_name: trainers.reduce_lr_on_plateau
+  class_name: ReduceLROnPlateauTrainer
+  tensorboard_enabled: True
+  epochs: 15
+  reduce_lr_on_plateau:
+    monitor: val_loss
+    factor: 0.1
+    patience: 5
+    min_delta: 1.0e-2
+
+data_preprocessing:
+  module_name: data_preprocessing.simple_normalize
+  class_name: SimpleNormalize
+  image_size: [140, 284]
+
+data:
+  batch_size: 4
+  prefetch: True
+  prefetch_buffer_size: 10
+  workers: 3
+
+devices:
+  memory_growth: True
