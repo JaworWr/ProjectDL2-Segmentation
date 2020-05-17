@@ -49,6 +49,7 @@ def process_config(args, cfg):
     elif "DATA_DIR" in os.environ:
         cfg.data.data_dir = os.environ["DATA_DIR"]
 
+
 def main(args):
     cfg = config.get_config(args.config_path)
     process_config(args, cfg)

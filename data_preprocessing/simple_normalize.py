@@ -1,4 +1,6 @@
 from base.data_preprocessing import BaseDataPreprocessing
+from utils.types import Datapoint
+from typing import Tuple
 import tensorflow as tf
 
 
@@ -13,12 +15,12 @@ class SimpleNormalize(BaseDataPreprocessing):
 
     def preprocess_config(self):
         self.config.model.input_shape = (*self.config.data_preprocessing.image_size, 3)
-        self.config.model.num_classes = 34
+        self.config.model.num_classes = 22
 
-    def preprocess(self, datapoint):
+    def preprocess(self, datapoint: Datapoint) -> Tuple[tf.Tensor, tf.Tensor]:
         image_size = tuple(self.config.data_preprocessing.image_size)
-        input_image = tf.image.resize(datapoint['image_left'], image_size)
-        input_mask = tf.image.resize(datapoint['segmentation_label'], image_size, method="nearest")
+        input_image = tf.image.resize(datapoint.image, image_size)
+        input_mask = tf.image.resize(datapoint.segmentation_mask, image_size, method="nearest")
 
         input_image = _normalize(input_image)
 
