@@ -11,4 +11,4 @@ experiments
 # except for the final report
 !Raport.ipynb
 # model parameters
-model_weights
+model_checkpoints
