@@ -21,11 +21,11 @@ class BaseTrainer:
 
             self.file_writer = tf.summary.create_file_writer(self.log_dir)
             self.file_writer.set_as_default()
-            tf.summary.text("config", self.config._text)
+            tf.summary.text("config", self.config._text, step=0)
             if self.config.model.save_checkpoint:
-                tf.summary.text("save_checkpoint", self.config.model.save_checkpoint)
+                tf.summary.text("save_checkpoint", self.config.model.save_checkpoint, step=0)
             if self.config.model.load_checkpoint:
-                tf.summary.text("load_checkpoint", self.config.model.load_checkpoint)
+                tf.summary.text("load_checkpoint", self.config.model.load_checkpoint, step=0)
 
             self._init_tensorboard_callback()
 

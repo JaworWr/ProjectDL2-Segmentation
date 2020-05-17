@@ -1,43 +1,150 @@
-import tensorflow_datasets as tfds
 from base.data_preprocessing import BaseDataPreprocessing
+import tensorflow as tf
+import os
+import numpy as np
+from utils.types import Datapoint
+from dataclasses import dataclass
+from typing import Sequence, Dict, Callable, Tuple
+from math import ceil
+
+DATASET_SIZE = 2913
+
+"""
+Splits: 70%/15%/15%
+"""
+SUBSET_SIZES = {
+    "train": int(0.7 * DATASET_SIZE),
+    "valid": int(0.15 * DATASET_SIZE),
+    "test": DATASET_SIZE - int(0.7 * DATASET_SIZE) - int(0.15 * DATASET_SIZE)
+}
 
 
-def get_train_valid_data(config, preprocessing: BaseDataPreprocessing):
+def color_map(n):
+    def bitget(byteval, idx):
+        return (byteval & (1 << idx)) != 0
 
-    def preprocess_train(datapoint):
-        return preprocessing.preprocess_train(datapoint)
+    indices = set(range(n)) | {255}
+    cmap = np.zeros((len(indices), 3), dtype=np.uint8)
+    for i in indices:
+        r = g = b = 0
+        c = i
+        for j in range(8):
+            r = r | (bitget(c, 0) << 7 - j)
+            g = g | (bitget(c, 1) << 7 - j)
+            b = b | (bitget(c, 2) << 7 - j)
+            c = c >> 3
 
-    def preprocess_test(datapoint):
-        return preprocessing.preprocess_test(datapoint)
-
-    d = _get_data(config, ["train[:90%]", "train[90%:]"],
-                  shuffle_files=config.data.get("shuffle", False))
-    d = [d[0].map(preprocess_train), d[1].map(preprocess_test)]
-    d = [s.prefetch(config.data.get("prefetch_buffer", 10)) for s in d]
-    return {"train": d[0], "valid": d[1]}
-
-
-def get_test_data(config, preprocessing: BaseDataPreprocessing):
-
-    def preprocess_test(datapoint):
-        return preprocessing.preprocess_test(datapoint)
-
-    return _get_data(config, "validation") \
-        .map(preprocess_test) \
-        .prefetch(config.data.get("prefetch_buffer", 10))
+        if i == 255:
+            i = -1
+        cmap[i] = np.array([r, g, b])
+    return cmap
 
 
-def _get_data(config, splits, shuffle_files=False):
-    data_dir = config.data.get("data_dir", "data")
+N_CLASSES = 21
+CMAP = color_map(N_CLASSES)
 
-    splits = tfds.load(
-        "cityscapes",
-        data_dir=data_dir,
-        batch_size=config.data.batch_size,
-        split=splits,
-        download=False,
-        as_dataset_kwargs=dict(
-            shuffle_files=shuffle_files
+
+def cmap_to_one_hot(img):
+    label = tf.equal(img[:, :, None, :], CMAP[None, None, :, :])
+    label = tf.reduce_all(label, axis=3)
+    label = tf.cast(label, tf.uint8)
+    return label
+
+
+def indices_to_cmap(indices):
+    return tf.gather(CMAP, indices, axis=0)
+
+
+@dataclass
+class Split:
+    split: Callable[[tf.data.Dataset], tf.data.Dataset]
+    preprocessing: Callable[[Datapoint], Tuple[tf.Tensor, tf.Tensor]]
+
+
+def get_train_valid_data(config, preprocessing: BaseDataPreprocessing) -> Dict[str, tf.data.Dataset]:
+    root = os.path.join(config.data.get("data_dir", "data"), "VOCdevkit", "VOC2012")
+    splits = {
+        "train": Split(
+            split=lambda ds: ds.take(SUBSET_SIZES["train"]),
+            preprocessing=lambda datapoint: preprocessing.preprocess_train(datapoint),
         ),
+        "valid": Split(
+            split=lambda ds: ds.skip(SUBSET_SIZES["train"]).take(SUBSET_SIZES["valid"]),
+            preprocessing=lambda datapoint: preprocessing.preprocess_test(datapoint),
+        ),
+    }
+    batch_size = config.data.get("batch_size", 1)
+    dataset = _create_dataset(
+        root,
+        _get_filenames(root, "trainval"),
+        splits,
+        config.data.get("workers", None),
+        batch_size,
     )
-    return splits
+    if config.data.shuffle:
+        dataset["train"] = dataset["train"].shuffle(config.data.get("shuffle_buffer_size",
+                                                                    ceil(SUBSET_SIZES["train"] / batch_size)))
+    if config.data.prefetch:
+        dataset = {k: ds.prefetch(config.data.get("prefetch_buffer_size", 50)) for k, ds in dataset.items()}
+    return dataset
+
+
+def get_test_data(config, preprocessing: BaseDataPreprocessing) -> Dict[str, tf.data.Dataset]:
+    root = os.path.join(config.data.get("data_dir", "data"), "VOCdevkit", "VOC2012")
+    splits = {"test": Split(
+        split=lambda ds: ds.skip(SUBSET_SIZES["train"] + SUBSET_SIZES["valid"]),
+        preprocessing=lambda datapoint: preprocessing.preprocess_test(datapoint),
+    )}
+    dataset = _create_dataset(
+        root,
+        _get_filenames(root, "trainval"),
+        splits,
+        config.data.get("workers"),
+        config.data.get("batch_size", 1),
+    )
+    if config.data.prefetch:
+        dataset["test"] = dataset["test"].prefetch(config.data.get("prefetch_buffer_size", 10))
+    return dataset
+
+
+def _get_filenames(root, split):
+    path = os.path.join(root, "ImageSets", "Segmentation", split + ".txt")
+    with open(path) as f:
+        filenames = [line.strip() for line in f.readlines()]
+    return filenames
+
+
+def _create_dataset(
+        root: str,
+        filenames: Sequence[str],
+        splits: Dict[str, Split],
+        workers: int,
+        batch_size: int,
+) -> Dict[str, tf.data.Dataset]:
+    def gen():
+        yield from filenames
+
+    dataset = tf.data.Dataset.from_generator(gen, output_types=tf.string)
+    split_datasets = {}
+    for name, s in splits.items():
+        def load_and_preprocess(filename):
+            datapoint = _load_sample(root, filename)
+            return s.preprocessing(datapoint)
+
+        split_datasets[name] = s.split(dataset) \
+            .map(load_and_preprocess, num_parallel_calls=workers) \
+            .batch(batch_size)
+    return split_datasets
+
+
+def _load_sample(root: str, filename: tf.Tensor) -> Datapoint:
+    image_path = tf.strings.join([root, "JPEGImages", filename + ".jpg"], separator=os.sep)
+    label_path = tf.strings.join([root, "SegmentationClass", filename + ".png"], separator=os.sep)
+    image = tf.io.read_file(image_path)
+    label = tf.io.read_file(label_path)
+    image = tf.image.decode_jpeg(image, channels=3)
+    label = tf.image.decode_png(label, channels=3)
+
+    label = cmap_to_one_hot(label)
+
+    return Datapoint(filename, image, label)
