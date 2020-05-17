@@ -10,6 +10,7 @@ def _downsample_block(channels, n=2, batch_norm=False, name=None, **kwargs):
             block.add(layers.BatchNormalization())
     return block
 
+
 def _upsample_block(channels, n=2, batch_norm=False, name=None):
     block = models.Sequential(name=name)
     for _ in range(n):
@@ -20,12 +21,13 @@ def _upsample_block(channels, n=2, batch_norm=False, name=None):
 
 
 def _upconvolution(channels, batch_norm=False, name=None):
-    block =  models.Sequential(name=name)
+    block = models.Sequential(name=name)
     block.add(layers.UpSampling2D(2))
     block.add(layers.Conv2D(channels, 2, padding="same"))
     if batch_norm:
         block.add(layers.BatchNormalization())
     return block
+
 
 class UnetModel(BaseModel):
     def build(self):
@@ -68,5 +70,5 @@ class UnetModel(BaseModel):
         self.model.compile(
             optimizer=optimizers.Adam(learning_rate=self.config.model.learning_rate),
             loss=losses.CategoricalCrossentropy(from_logits=True),
-            metrics=[metrics.Accuracy()],
+            metrics=[metrics.CategoricalAccuracy()],
         )
