@@ -67,6 +67,6 @@ class UnetModel(BaseModel):
 
         self.model.compile(
             optimizer=optimizers.Adam(learning_rate=self.config.model.learning_rate),
-            loss=losses.SparseCategoricalCrossentropy(from_logits=True),
-            metrics=[metrics.SparseCategoricalAccuracy()],
+            loss=losses.CategoricalCrossentropy(from_logits=True),
+            metrics=[metrics.Accuracy()],
         )

@@ -72,7 +72,7 @@ def main(args):
     model: base.model.BaseModel = classes["model"](cfg)
     model.build()
     model.compile()
-    print(model.summary())
+    model.summary()
     model.load()
 
     trainer: base.trainer.BaseTrainer = classes["trainer"](cfg, model, data_loaders)

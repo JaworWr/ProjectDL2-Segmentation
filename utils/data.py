@@ -5,6 +5,7 @@ import numpy as np
 from utils.types import Datapoint
 from dataclasses import dataclass
 from typing import Sequence, Dict, Callable, Tuple
+from math import ceil
 
 DATASET_SIZE = 2913
 
@@ -72,14 +73,17 @@ def get_train_valid_data(config, preprocessing: BaseDataPreprocessing) -> Dict[s
             preprocessing=lambda datapoint: preprocessing.preprocess_test(datapoint),
         ),
     }
+    batch_size = config.data.get("batch_size", 1)
     dataset = _create_dataset(
         root,
         _get_filenames(root, "trainval"),
         splits,
         config.data.get("workers", None),
+        batch_size,
     )
     if config.data.shuffle:
-        dataset["train"] = dataset["train"].shuffle(config.data.get("shuffle_buffer_size", SUBSET_SIZES["train"]))
+        dataset["train"] = dataset["train"].shuffle(config.data.get("shuffle_buffer_size",
+                                                                    ceil(SUBSET_SIZES["train"] / batch_size)))
     if config.data.prefetch:
         dataset = {k: ds.prefetch(config.data.get("prefetch_buffer_size", 50)) for k, ds in dataset.items()}
     return dataset
@@ -96,6 +100,7 @@ def get_test_data(config, preprocessing: BaseDataPreprocessing) -> Dict[str, tf.
         _get_filenames(root, "trainval"),
         splits,
         config.data.get("workers"),
+        config.data.get("batch_size", 1),
     )
     if config.data.prefetch:
         dataset["test"] = dataset["test"].prefetch(config.data.get("prefetch_buffer_size", 10))
@@ -113,7 +118,8 @@ def _create_dataset(
         root: str,
         filenames: Sequence[str],
         splits: Dict[str, Split],
-        workers: int
+        workers: int,
+        batch_size: int,
 ) -> Dict[str, tf.data.Dataset]:
     def gen():
         yield from filenames
@@ -121,13 +127,13 @@ def _create_dataset(
     dataset = tf.data.Dataset.from_generator(gen, output_types=tf.string)
     split_datasets = {}
     for name, s in splits.items():
-        split_datasets[name] = s.split(dataset)
-
         def load_and_preprocess(filename):
             datapoint = _load_sample(root, filename)
             return s.preprocessing(datapoint)
 
-        split_datasets[name] = split_datasets[name].map(load_and_preprocess, num_parallel_calls=workers)
+        split_datasets[name] = s.split(dataset) \
+            .map(load_and_preprocess, num_parallel_calls=workers) \
+            .batch(batch_size)
     return split_datasets
 
 
