@@ -8,9 +8,9 @@ class BaseModel:
         if self.model is None:
             raise RuntimeError("You have to build the model before saving it.")
 
-        if self.config.save_checkpoint:
+        if self.config.model.save_checkpoint:
             print("Saving model...")
-            self.model.save_weights(self.config.save_checkpoint)
+            self.model.save_weights(self.config.model.save_checkpoint)
             print("Model saved")
 
     # load latest checkpoint from the experiment path defined in the config file
@@ -18,9 +18,9 @@ class BaseModel:
         if self.model is None:
             raise RuntimeError("You have to build the model before loading it.")
 
-        if self.config.load_checkpoint:
-            print(f"Loading model checkpoint {self.config.load_checkpoint}...")
-            self.model.load_weights(self.config.load_checkpoint)
+        if self.config.model.load_checkpoint:
+            print(f"Loading model checkpoint {self.config.model.load_checkpoint}...")
+            self.model.load_weights(self.config.model.load_checkpoint)
             print("Model loaded")
 
     def build(self):
