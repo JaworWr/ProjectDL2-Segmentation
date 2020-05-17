@@ -4,6 +4,10 @@ import os
 from datetime import datetime
 
 
+def _markdown_format(text: str):
+    return "<pre>\n" + text + "\n</pre>"
+
+
 class BaseTrainer:
     def __init__(self, config, model, data):
         self.config = config
@@ -21,11 +25,11 @@ class BaseTrainer:
 
             self.file_writer = tf.summary.create_file_writer(self.log_dir)
             self.file_writer.set_as_default()
-            tf.summary.text("config", self.config._text, step=0)
+            tf.summary.text("config", _markdown_format(self.config._text), step=-1)
             if self.config.model.save_checkpoint:
-                tf.summary.text("save_checkpoint", self.config.model.save_checkpoint, step=0)
+                tf.summary.text("save_checkpoint", self.config.model.save_checkpoint, step=-1)
             if self.config.model.load_checkpoint:
-                tf.summary.text("load_checkpoint", self.config.model.load_checkpoint, step=0)
+                tf.summary.text("load_checkpoint", self.config.model.load_checkpoint, step=-1)
 
             self._init_tensorboard_callback()
 
