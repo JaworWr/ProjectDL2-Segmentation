@@ -12,3 +12,5 @@ experiments
 !Raport.ipynb
 # model parameters
 model_checkpoints
+# .env files
+.env
