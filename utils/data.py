@@ -4,7 +4,7 @@ import os
 import numpy as np
 from utils.types import Datapoint
 from dataclasses import dataclass
-from typing import Sequence, Dict, Callable, Tuple
+from typing import Sequence, Dict, Callable, Any
 from math import ceil
 
 DATASET_SIZE = 2913
@@ -59,7 +59,7 @@ def indices_to_cmap(indices):
 @dataclass
 class Split:
     split: Callable[[tf.data.Dataset], tf.data.Dataset]
-    preprocessing: Callable[[Datapoint], Tuple[tf.Tensor, tf.Tensor]]
+    preprocessing: Callable[[Datapoint], Any]
 
 
 def get_train_valid_data(config, preprocessing: BaseDataPreprocessing) -> Dict[str, tf.data.Dataset]:
@@ -94,7 +94,7 @@ def get_test_data(config, preprocessing: BaseDataPreprocessing) -> Dict[str, tf.
     root = os.path.join(config.data.get("data_dir", "data"), "VOCdevkit", "VOC2012")
     splits = {"test": Split(
         split=lambda ds: ds.skip(SUBSET_SIZES["train"] + SUBSET_SIZES["valid"]),
-        preprocessing=lambda datapoint: preprocessing.preprocess_valid(datapoint),
+        preprocessing=lambda datapoint: preprocessing.preprocess_test(datapoint),
     )}
     dataset = _create_dataset(
         root,

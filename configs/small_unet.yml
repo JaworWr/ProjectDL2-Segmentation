@@ -26,6 +26,8 @@ data:
   batch_size: 4
   prefetch: True
   prefetch_buffer_size: 10
+  shuffle: True
+  shuffle_buffer_size: 100
   workers: 3
 
 devices:
