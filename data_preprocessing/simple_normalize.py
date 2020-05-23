@@ -9,11 +9,9 @@ def _normalize(input_image):
     input_image = tf.cast(input_image, tf.float64) / 127.5 - 1.
     return input_image
 
-
 class SimpleNormalize(BaseDataPreprocessing):
     def __init__(self, config):
         super().__init__(config)
-        self.n_pixels = config.data_preprocessing.image_size[0] * config.data_preprocessing.image_size[1]
 
     def preprocess_config(self):
         self.config.model.input_shape = (*self.config.data_preprocessing.image_size, 3)
@@ -25,18 +23,20 @@ class SimpleNormalize(BaseDataPreprocessing):
         input_mask = tf.image.resize(datapoint.segmentation_mask, image_size, method="nearest")
 
         input_image = _normalize(input_image)
-        input_mask = tf.reshape(input_mask, (-1, self.n_pixels))
+        input_mask = tf.reshape(input_mask, (-1, 22))
 
+        mask_indices = tf.argmax(input_mask, 1)
         # ignore last label
         input_weights = tf.where(
-            input_mask == N_CLASSES-1,
+            mask_indices == N_CLASSES-1,
             0.,
             1.,
         )
+
         # optionally set background weight
         if "background_class_weight" in self.config.data_preprocessing:
             input_weights = tf.where(
-                input_mask == 0,
+                mask_indices == 0,
                 self.config.data_preprocessing.background_class_weight,
                 input_weights
             )
