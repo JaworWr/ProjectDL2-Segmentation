@@ -40,8 +40,9 @@ def color_map(n):
     return cmap
 
 
-N_CLASSES = 21
-CMAP = color_map(N_CLASSES)
+N_PROPER_CLASSES = 21
+N_CLASSES = N_PROPER_CLASSES + 1
+CMAP = color_map(N_PROPER_CLASSES)
 
 
 def cmap_to_one_hot(img):
@@ -70,7 +71,7 @@ def get_train_valid_data(config, preprocessing: BaseDataPreprocessing) -> Dict[s
         ),
         "valid": Split(
             split=lambda ds: ds.skip(SUBSET_SIZES["train"]).take(SUBSET_SIZES["valid"]),
-            preprocessing=lambda datapoint: preprocessing.preprocess_test(datapoint),
+            preprocessing=lambda datapoint: preprocessing.preprocess_valid(datapoint),
         ),
     }
     batch_size = config.data.get("batch_size", 1)
@@ -93,7 +94,7 @@ def get_test_data(config, preprocessing: BaseDataPreprocessing) -> Dict[str, tf.
     root = os.path.join(config.data.get("data_dir", "data"), "VOCdevkit", "VOC2012")
     splits = {"test": Split(
         split=lambda ds: ds.skip(SUBSET_SIZES["train"] + SUBSET_SIZES["valid"]),
-        preprocessing=lambda datapoint: preprocessing.preprocess_test(datapoint),
+        preprocessing=lambda datapoint: preprocessing.preprocess_valid(datapoint),
     )}
     dataset = _create_dataset(
         root,

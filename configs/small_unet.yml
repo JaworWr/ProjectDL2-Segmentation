@@ -13,13 +13,14 @@ trainer:
   reduce_lr_on_plateau:
     monitor: val_loss
     factor: 0.1
-    patience: 5
+    patience: 3
     min_delta: 1.0e-2
 
 data_preprocessing:
   module_name: data_preprocessing.simple_normalize
   class_name: SimpleNormalize
   image_size: [140, 284]
+  background_class_weight: 0.3
 
 data:
   batch_size: 4

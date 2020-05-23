@@ -60,7 +60,10 @@ class UnetModel(BaseModel):
             x = block(x)
 
         output_conv = layers.Conv2D(self.config.model.num_classes, 1)
-        outputs = output_conv(x)
+        x = output_conv(x)
+
+        flatten = layers.Reshape((-1, self.config.model.num_classes))
+        outputs = flatten(x)
         self.model = models.Model(inputs=inputs, outputs=outputs)
 
     def compile(self):
@@ -71,4 +74,5 @@ class UnetModel(BaseModel):
             optimizer=optimizers.Adam(learning_rate=self.config.model.learning_rate),
             loss=losses.CategoricalCrossentropy(from_logits=True),
             metrics=[metrics.CategoricalAccuracy()],
+            sample_weight_mode="temporal",
         )
