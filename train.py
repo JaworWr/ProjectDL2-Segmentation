@@ -32,7 +32,7 @@ def get_args():
         dest="data_dir",
         default=None,
         type=str,
-        help="Location of the prepared data"
+        help="Location of the prepared data. Overwrites data.data_dir in configuration file"
     )
     args = parser.parse_args()
     return args
