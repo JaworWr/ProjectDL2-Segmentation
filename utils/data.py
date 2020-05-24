@@ -94,7 +94,7 @@ def get_test_data(config, preprocessing: BaseDataPreprocessing) -> Dict[str, tf.
     root = os.path.join(config.data.get("data_dir", "data"), "VOCdevkit", "VOC2012")
     splits = {"test": Split(
         split=lambda ds: ds.skip(SUBSET_SIZES["train"] + SUBSET_SIZES["valid"]),
-        preprocessing=lambda datapoint: preprocessing.preprocess_test(datapoint),
+        preprocessing=lambda datapoint: preprocessing.preprocess_valid(datapoint),
     )}
     dataset = _create_dataset(
         root,
