@@ -9,7 +9,8 @@ def _normalize(input_image):
     input_image = tf.cast(input_image, tf.float64) / 127.5 - 1.
     return input_image
 
-class SimpleNormalize(BaseDataPreprocessing):
+
+class NormalizationPreprocessing(BaseDataPreprocessing):
     def __init__(self, config):
         super().__init__(config)
 
