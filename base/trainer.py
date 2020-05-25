@@ -48,7 +48,7 @@ class BaseTrainer:
         if "filepath" in self.config.trainer.model_checkpoint_args:
             filepath = self.config.trainer.model_checkpoint_args.filepath
         elif "save_checkpoint" in self.config.model:
-            filepath = self.config.model.save_checkpoint + "_training"
+            filepath = self.config.model.save_checkpoint + "_best"
 
         self.callbacks.append(callbacks.ModelCheckpoint(
             save_weights_only=True,
