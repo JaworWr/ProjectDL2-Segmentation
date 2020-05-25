@@ -52,8 +52,8 @@ class BaseTrainer:
 
         self.callbacks.append(callbacks.ModelCheckpoint(
             save_weights_only=True,
-            filepath=filepath
-            **self.config.trainer.model_checkpoint_args
+            filepath=filepath,
+            **self.config.trainer.model_checkpoint_args,
         ))
 
     def train(self):
