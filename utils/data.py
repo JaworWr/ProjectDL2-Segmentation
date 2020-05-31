@@ -5,7 +5,7 @@ import numpy as np
 from utils.types import Datapoint
 from dataclasses import dataclass
 from typing import Sequence, Dict, Callable, Any
-from math import ceil
+import math
 
 DATASET_SIZE = 2913
 
@@ -56,6 +56,11 @@ def indices_to_cmap(indices):
     return tf.gather(CMAP, indices, axis=0)
 
 
+def get_train_batch_count(config) -> int:
+    batch_size = config.data.get("batch_size", 1)
+    return math.ceil(SUBSET_SIZES["train"] / batch_size)
+
+
 @dataclass
 class Split:
     split: Callable[[tf.data.Dataset], tf.data.Dataset]
@@ -83,8 +88,8 @@ def get_train_valid_data(config, preprocessing: BaseDataPreprocessing) -> Dict[s
         batch_size,
     )
     if config.data.shuffle:
-        dataset["train"] = dataset["train"].shuffle(config.data.get("shuffle_buffer_size",
-                                                                    ceil(SUBSET_SIZES["train"] / batch_size)))
+        dataset["train"] = dataset["train"].shuffle(
+            config.data.get("shuffle_buffer_size", get_train_batch_count(config)))
     if config.data.prefetch:
         dataset = {k: ds.prefetch(config.data.get("prefetch_buffer_size", 50)) for k, ds in dataset.items()}
     return dataset
