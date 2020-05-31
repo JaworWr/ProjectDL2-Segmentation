@@ -67,6 +67,7 @@ def main(args):
 
     print("Loading data...")
     data_loaders = data.get_train_valid_data(cfg, preprocessing)
+    print(f"Number of training batches: {data.get_train_batch_count(cfg)}")
 
     print("Building model...")
     model: base.model.BaseModel = classes["model"](cfg)

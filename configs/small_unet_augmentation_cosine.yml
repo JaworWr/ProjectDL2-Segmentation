@@ -1,0 +1,35 @@
+model:
+  module_name: models.unet
+  class_name: UnetModel
+  channels: [32, 64, 128]
+  batch_norm: True
+  learning_rate: 1.0e-3
+
+trainer:
+  module_name: trainers.cosine_annealing
+  class_name: CosineAnnealingTrainer
+  tensorboard_enabled: True
+  log_directory: experiments/small_unet/logs
+  model_checkpoint: True
+  epochs: 21
+  lr_min: 2.0e-4
+  lr_max: 5.0e-3
+  run_initial: 3
+  run_mult: 2
+
+data_preprocessing:
+  module_name: data_preprocessing.augmentation
+  class_name: AugmentationPreprocessing
+  image_size: [140, 284]
+  background_class_weight: 0.1
+
+data:
+  batch_size: 4
+  prefetch: True
+  prefetch_buffer_size: 10
+  shuffle: True
+#  shuffle_buffer_size: 100
+  workers: 3
+
+devices:
+  memory_growth: True

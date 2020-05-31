@@ -5,15 +5,14 @@ import numpy as np
 from utils.data import get_train_batch_count
 
 class CosineAnnealingCallback(callbacks.Callback):
-    def __init__(self, lr_min, lr_max, run_mult, n_batches):
+    def __init__(self, lr_min, lr_max, run_initial, run_mult, n_batches):
         super().__init__()
         self.lr_min = lr_min
         self.lr_max = lr_max
+        self.run_len = run_initial
         self.run_mult = run_mult
         self.n_batches = n_batches
-
         self.run_epoch = 0
-        self.run_len = 1
 
     def on_epoch_end(self, epoch, logs=None):
         self.run_epoch += 1
@@ -45,6 +44,7 @@ class CosineAnnealingTrainer(BaseTrainer):
         self.callbacks.append(CosineAnnealingCallback(
             lr_min=self.config.trainer.lr_min,
             lr_max=self.config.trainer.lr_max,
+            run_initial=self.config.trainer.run_initial,
             run_mult=self.config.trainer.run_mult,
             n_batches=self.n_batches,
         ))
