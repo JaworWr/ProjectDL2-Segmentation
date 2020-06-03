@@ -58,6 +58,8 @@ class UnetMobileNetV2Model(BaseModel):
             block = _upsample_block(k, batch_norm=batch_norm, name=f"upsampler_block_{i}", padding="same")
             x = block(x)
 
+        output_upsample = _upconvolution(22)
+        x = output_upsample(output_channels[0], batch_norm=batch_norm, name=f"up_conv2d_out")
         output_conv = layers.Conv2D(self.config.model.num_classes, 1)
         x = output_conv(x)
 
