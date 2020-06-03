@@ -9,7 +9,7 @@ trainer:
   module_name: trainers.cosine_annealing
   class_name: CosineAnnealingTrainer
   tensorboard_enabled: True
-  log_directory: experiments/large_unet/logs
+  log_directory: experiments/unet_mobilenet/logs
   model_checkpoint: True
   epochs: 60
   lr_min: 3.0e-4
