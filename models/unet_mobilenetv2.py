@@ -30,7 +30,8 @@ class UnetMobileNetV2Model(BaseModel):
         x = inputs
         batch_norm = self.config.model.batch_norm
 
-        base_model = applications.MobileNetV2(input_shape=self.config.model.input_shape, include_top=False)
+        base_model = applications.MobileNetV2(input_shape=self.config.model.input_shape, include_top=False,
+                                              alpha=self.config.model.get("alpha", 1.))
 
         # Use the activations of these layers
         layer_names = [
