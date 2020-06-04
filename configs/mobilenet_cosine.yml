@@ -1,0 +1,34 @@
+model:
+  module_name: models.unet_mobilenetv2
+  class_name: UnetMobileNetV2Model
+  batch_norm: True
+  learning_rate: 1.0e-3
+  alpha: 0.5
+
+trainer:
+  module_name: trainers.cosine_annealing
+  class_name: CosineAnnealingTrainer
+  tensorboard_enabled: True
+  log_directory: experiments/mobile_unet/logs
+  model_checkpoint: True
+  epochs: 45
+  lr_min: 2.0e-4
+  lr_max: 2.0e-3
+  run_initial: 3
+  run_mult: 2
+
+data_preprocessing:
+  module_name: data_preprocessing.augmentation
+  class_name: AugmentationPreprocessing
+  image_size: [192, 192]
+  background_class_weight: 0.1
+
+data:
+  batch_size: 16
+  prefetch: True
+  prefetch_buffer_size: 10
+  shuffle: True
+  workers: 10
+
+devices:
+  memory_growth: False
