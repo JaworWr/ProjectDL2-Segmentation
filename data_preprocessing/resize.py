@@ -5,7 +5,7 @@ from typing import Tuple
 import tensorflow as tf
 
 
-class NoOpPreprocessing(BaseDataPreprocessing):
+class ResizePreprocessing(BaseDataPreprocessing):
     def __init__(self, config):
         super().__init__(config)
         self.n_pixels = config.data_preprocessing.image_size[0] * config.data_preprocessing.image_size[1]
@@ -15,13 +15,15 @@ class NoOpPreprocessing(BaseDataPreprocessing):
         self.config.model.num_classes = N_CLASSES
 
     def preprocess_train_valid(self, datapoint: Datapoint) -> Tuple[tf.Tensor, tf.Tensor, tf.Tensor]:
+        image_size = tuple(self.config.data_preprocessing.image_size)
+        input_image = tf.image.resize(datapoint.image, image_size)
+        input_mask = tf.image.resize(datapoint.segmentation_mask, image_size, method="nearest")
 
-        mask = tf.reshape(
-            datapoint.segmentation_mask,
-            (-1, self.n_pixels)
-        )
-        weights = tf.ones_like(mask)
-        return (datapoint.image, mask, weights)
+        input_mask = tf.reshape(input_mask, (-1, 22))
+
+        mask_indices = tf.argmax(input_mask, 1)
+        weights = tf.ones_like(mask_indices)
+        return (input_image, input_mask, weights)
 
     def preprocess_test(self, datapoint: Datapoint) -> Tuple[tf.Tensor]:
         return (datapoint.image,)
