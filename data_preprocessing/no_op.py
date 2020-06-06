@@ -20,7 +20,7 @@ class NoOpPreprocessing(BaseDataPreprocessing):
             datapoint.segmentation_mask,
             (-1, self.n_pixels)
         )
-        weights = tf.ones(mask.shape)
+        weights = tf.ones_like(mask)
         return (datapoint.image, mask, weights)
 
     def preprocess_test(self, datapoint: Datapoint) -> Tuple[tf.Tensor]:
