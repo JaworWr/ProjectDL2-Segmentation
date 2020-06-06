@@ -9,7 +9,7 @@ trainer:
   module_name: trainers.reduce_lr_on_plateau
   class_name: ReduceLROnPlateauTrainer
   tensorboard_enabled: True
-  log_directory: experiments/small_unet/logs
+  log_directory: experiments/mobilenet/logs
   model_checkpoint: True
   epochs: 30
   reduce_lr_on_plateau:
