@@ -1,0 +1,57 @@
+# parameters used by the model class
+model:
+  # module and class names
+  module_name: models.example
+  class_name: ExampleModel
+  # saving and loading location. These can also be specified as command-lien arguments
+  #  save_checkpoint:
+  #  load_checkpoint:
+  # this section also contains model-specific parameters. Some common parameters are listed below:
+  # learning rate passed to model.compile
+  learning_rate: 1.0e-3
+
+# parameters used by the trainer class
+trainer:
+  # module and class names
+  module_name: base.trainer
+  class_name: BaseTrainer
+
+  epochs: 10
+  # whether to log training to Tensorboard, default: true
+  #  tensorboard_enabled: false
+  # directory to store Tensorboard logs, default: experiments/logs
+  #  log_directory:
+  # name of a subdirectory to create for storing experiment logs, by default generated from current date and time
+  #  experiment_name:
+  # additional parameters may be used by different trainer classes
+
+# parameters used during image preprocessing
+data_preprocessing:
+  # module and class names
+  module_name: data_preprocessing.normalization
+  class_name: NormalizationPreprocessing
+  # target image size
+  image_size: [140, 284]
+  # additional parameters may be required depending on the class
+
+# parameters specifying Tensorflow devices behavior
+devices:
+  # enables memory growth for GPUs, default: false
+  memory_growth: true
+  # enables device placement logging, default: false
+  #  log_device_placement: true
+
+# parameters for the data loaders
+data:
+  # directory containing the extracted data. Defaults to 'data'.
+  # Can also be specified in command line arguments or an environment variable
+  # data_dir: data
+  batch_size: 64
+  # whether to prefetch the data and the size of the prefetch buffer
+  prefetch: True
+  prefetch_buffer_size: 10
+  # whether to shuffle the training data and the size of the shuffle buffer
+  shuffle: True
+  shuffle_buffer_size: 100
+  # number of parallel calls during loading and preprocessing of the data
+  workers: 3
