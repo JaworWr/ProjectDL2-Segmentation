@@ -6,16 +6,23 @@ model:
   learning_rate: 1.0e-3
 
 trainer:
-  module_name: trainers.cosine_annealing
-  class_name: CosineAnnealingTrainer
+#  module_name: trainers.cosine_annealing
+#  class_name: CosineAnnealingTrainer
+  module_name: trainers.reduce_lr_on_plateau
+  class_name: ReduceLROnPlateauTrainer
   tensorboard_enabled: True
   log_directory: experiments/large_unet/logs
   model_checkpoint: True
-  epochs: 60
-  lr_min: 3.0e-4
-  lr_max: 3.0e-3
-  run_initial: 4
-  run_mult: 2
+  epochs: 45
+#  lr_min: 3.0e-4
+#  lr_max: 3.0e-3
+#  run_initial: 4
+#  run_mult: 2
+  reduce_lr_on_plateau:
+    monitor: val_loss
+    factor: 0.1
+    patience: 8
+    min_delta: 1.0e-2
 
 data_preprocessing:
   module_name: data_preprocessing.augmentation
