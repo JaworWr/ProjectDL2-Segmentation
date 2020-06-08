@@ -77,8 +77,8 @@ def evaluate(cfg):
         workers=cfg.trainer.get("workers", 1),
     )
     print("\n" + "-" * 80)
-    for metric, x in zip(["loss", "accuracy", "weighted_accuracy"], result):
-        print(f"{metric}: {x}")
+    for metric, x in zip(model.metrics_names, result):
+        print(f"{metric}: {x:.4f}")
     print("-" * 80)
 
 
