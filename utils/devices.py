@@ -9,6 +9,7 @@ def device_setup(config):
         print("GPU devices found")
         if config.devices.get("memory_growth", False):
             print("Enabling memory growth")
-            tf.config.experimental.set_memory_growth(devices[0], True)
+            for device in devices:
+                tf.config.experimental.set_memory_growth(device, True)
     else:
         print("No GPU device found")
