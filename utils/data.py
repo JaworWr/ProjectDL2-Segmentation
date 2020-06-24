@@ -18,6 +18,8 @@ SUBSET_SIZES = {
     "test": DATASET_SIZE - int(0.7 * DATASET_SIZE) - int(0.15 * DATASET_SIZE)
 }
 
+DEFAULT_PREFETCH_BUFFER = 50
+
 
 def color_map(n):
     def bitget(byteval, idx):
@@ -79,19 +81,18 @@ def get_train_valid_data(config, preprocessing: BaseDataPreprocessing) -> Dict[s
             preprocessing=lambda datapoint: preprocessing.preprocess_valid(datapoint),
         ),
     }
-    batch_size = config.data.get("batch_size", 1)
     dataset = _create_dataset(
         root,
         _get_filenames(root, "trainval"),
         splits,
         config.data.get("workers", None),
-        batch_size,
     )
     if config.data.shuffle:
         dataset["train"] = dataset["train"].shuffle(
-            config.data.get("shuffle_buffer_size", get_train_batch_count(config)))
+            config.data.get("shuffle_buffer_size", SUBSET_SIZES["train"]))
     if config.data.prefetch:
-        dataset = {k: ds.prefetch(config.data.get("prefetch_buffer_size", 50)) for k, ds in dataset.items()}
+        dataset = {k: ds.prefetch(config.data.get("prefetch_buffer_size", DEFAULT_PREFETCH_BUFFER))
+                   for k, ds in dataset.items()}
     return dataset
 
 
@@ -106,7 +107,6 @@ def get_test_data(config, preprocessing: BaseDataPreprocessing) -> Dict[str, tf.
         _get_filenames(root, "trainval"),
         splits,
         config.data.get("workers"),
-        config.data.get("batch_size", 1),
     )
     if config.data.prefetch:
         dataset["test"] = dataset["test"].prefetch(config.data.get("prefetch_buffer_size", 10))
@@ -125,7 +125,6 @@ def _create_dataset(
         filenames: Sequence[str],
         splits: Dict[str, Split],
         workers: int,
-        batch_size: int,
 ) -> Dict[str, tf.data.Dataset]:
     def gen():
         yield from filenames
@@ -138,8 +137,7 @@ def _create_dataset(
             return s.preprocessing(datapoint)
 
         split_datasets[name] = s.split(dataset) \
-            .map(load_and_preprocess, num_parallel_calls=workers) \
-            .batch(batch_size)
+            .map(load_and_preprocess, num_parallel_calls=workers)
     return split_datasets
 
 

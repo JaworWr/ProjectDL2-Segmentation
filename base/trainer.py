@@ -58,7 +58,7 @@ class BaseTrainer:
 
     def train(self):
         self.model.fit(
-            self.data["train"],
+            self.data["train"].batch(self.config.data.get("batch_size", 1)),
             validation_data=self.data["valid"],
             callbacks=self.callbacks,
             epochs=self.config.trainer.epochs,
