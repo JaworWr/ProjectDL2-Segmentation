@@ -73,7 +73,7 @@ def evaluate(cfg):
 
     print("Evaluating...")
     result = model.evaluate(
-        data_loader,
+        data_loader.batch(cfg.data.get("batch_size", 1)),
         workers=cfg.trainer.get("workers", 1),
     )
     print("\n" + "-" * 80)
