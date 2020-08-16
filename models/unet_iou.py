@@ -74,5 +74,4 @@ class UnetModel(BaseModel):
             loss=losses.CategoricalCrossentropy(from_logits=True),
             metrics=[metrics.CategoricalAccuracy(name="accuracy")],
             weighted_metrics=[metrics.MeanIoU(N_CLASSES, name="weighted_iou")],
-            sample_weight_mode="temporal",
         )
