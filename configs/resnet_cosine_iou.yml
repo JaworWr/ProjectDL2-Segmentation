@@ -18,7 +18,7 @@ trainer:
   run_mult: 2
 
 data_preprocessing:
-  module_name: data_preprocessing.augmentation_iou
+  module_name: data_preprocessing.augmentation
   class_name: AugmentationPreprocessing
   image_size: [192, 192]
   background_class_weight: 0.1
